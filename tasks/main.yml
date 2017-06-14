@@ -1,0 +1,18 @@
+---
+- name: Ensure not running on smarthost
+  fail:
+    msg: Task not to be run on smarthost
+  when: ansible_fqdn == smhs_relay_host
+
+- name: Install Postfix
+  package:
+    name: postfix
+    state: present
+
+- name: Enable mail relaying
+  lineinfile: >
+    dest={{ smhs_main_cf }}
+    regexp="(?i)^\\s*relayhost\\b"
+    insertafter="(?i)^#\\s*relayhost\\b"
+    line="relayhost = {{ smhs_relay_host }}"
+  notify: Reload Postfix
